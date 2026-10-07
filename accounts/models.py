@@ -13,11 +13,11 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
-        default='CANDIDATE'
+        default=Role.CANDIDATE
         )
 
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return super().__str__()
+        return f"{self.username} ({self.role})"
