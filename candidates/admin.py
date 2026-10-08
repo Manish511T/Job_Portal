@@ -20,3 +20,4 @@ class CandidateProfileAdmin(admin.ModelAdmin):
     ]
 
     filter_horizontal = ['skills']
+    list_select_related = ['user']
