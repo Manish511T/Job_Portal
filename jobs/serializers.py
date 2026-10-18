@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Skill, Job
+from companies.models import Company
+from companies.serializers import CompanyMiniSerializer
 from django.utils import timezone
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,10 +28,35 @@ class SkillSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    # Output: nested company details
+    company = CompanyMiniSerializer(read_only=True)
+    # Input: company ID
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset = Company.objects.all(),
+        source = 'company',
+        write_only=True,
+    )
+
+    # Output: nested skill objects
+    skills = SkillSerializer(many=True, read_only=True)
+    # Input: list of skills IDs
+    skill_ids = serializers.PrimaryKeyRelatedField(
+        queryset = Skill.objects.all(),
+        source = 'skills',
+        many = True,
+        write_only = True
+    )
+
+    applications_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Job
-        fields = ['id', 'company', 'title', 'description', 'location', 'job_type', 'salary_min', 'salary_max', 'experience_required', 'skills', 'deadline', 'status', 'created_at']
+        fields = ['id', 'company','company_id','applications_count', 'title', 'description', 'location', 'job_type', 'salary_min', 'salary_max', 'experience_required', 'skills','skill_ids', 'deadline', 'status', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def get_applications_count(self, obj):
+        return obj.applications.count()
+    
 
     def validate_deadline(self, value):
         if value < timezone.now().date():
@@ -57,5 +84,4 @@ class JobSerializer(serializers.ModelSerializer):
                 "Job title cannot be empty"
             )
         return value
-    
                 

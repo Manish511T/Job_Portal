@@ -40,10 +40,12 @@ class SkillDetailView(APIView):
         skill = get_object_or_404(Skill, id=pk)
         skill.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class JobListCreateView(APIView):
 
     def get(self, request):
-        jobs = Job.objects.all()
+        jobs = Job.objects.select_related('company').prefetch_related('skills')
         serializer = JobSerializer(jobs, many=True)
         return Response(
             serializer.data,
@@ -68,7 +70,7 @@ class JobListCreateView(APIView):
 class JobDetailView(APIView):
 
     def get(self, request, pk):
-        job = get_object_or_404(Job, pk=pk)
+        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
         serializer = JobSerializer(job)
         return Response(
             serializer.data,
@@ -76,7 +78,7 @@ class JobDetailView(APIView):
         )
 
     def put(self, request, pk):
-        job = get_object_or_404(Job, pk=pk)
+        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
         serializer = JobSerializer(job, data=request.data)
 
         if serializer.is_valid():
@@ -92,7 +94,7 @@ class JobDetailView(APIView):
         )
 
     def patch(self, request, pk):
-        job = get_object_or_404(Job, pk=pk)
+        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
         serializer = JobSerializer(
             job,
             data=request.data,
