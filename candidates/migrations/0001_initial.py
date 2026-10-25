@@ -10,22 +10,45 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('jobs', '0001_initial'),
+        ("jobs", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CandidateProfile',
+            name="CandidateProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('location', models.CharField(blank=True, max_length=200)),
-                ('education', models.TextField(blank=True)),
-                ('experience_years', models.PositiveSmallIntegerField(default=0)),
-                ('resume', models.FileField(blank=True, null=True, upload_to='resumes/')),
-                ('skills', models.ManyToManyField(blank=True, related_name='candidates', to='jobs.skill')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='candidate_profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("location", models.CharField(blank=True, max_length=200)),
+                ("education", models.TextField(blank=True)),
+                ("experience_years", models.PositiveSmallIntegerField(default=0)),
+                (
+                    "resume",
+                    models.FileField(blank=True, null=True, upload_to="resumes/"),
+                ),
+                (
+                    "skills",
+                    models.ManyToManyField(
+                        blank=True, related_name="candidates", to="jobs.skill"
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="candidate_profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -15,17 +15,49 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Application',
+            name="Application",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('resume', models.FileField(blank=True, null=True, upload_to='application_resumes/')),
-                ('cover_letter', models.TextField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('APPLIED', 'Applied'), ('SHORTLISTED', 'Shortlisted'), ('REJECTED', 'Rejected'), ('SELECTED', 'Selected')], default='APPLIED', max_length=20)),
-                ('applied_at', models.DateTimeField(auto_now_add=True)),
-                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "resume",
+                    models.FileField(
+                        blank=True, null=True, upload_to="application_resumes/"
+                    ),
+                ),
+                ("cover_letter", models.TextField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("APPLIED", "Applied"),
+                            ("SHORTLISTED", "Shortlisted"),
+                            ("REJECTED", "Rejected"),
+                            ("SELECTED", "Selected"),
+                        ],
+                        default="APPLIED",
+                        max_length=20,
+                    ),
+                ),
+                ("applied_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "candidate",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="applications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-applied_at'],
+                "ordering": ["-applied_at"],
             },
         ),
     ]

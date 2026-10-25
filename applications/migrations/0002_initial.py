@@ -9,18 +9,24 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('applications', '0001_initial'),
-        ('jobs', '0002_job'),
+        ("applications", "0001_initial"),
+        ("jobs", "0002_job"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='applications', to='jobs.job'),
+            model_name="application",
+            name="job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="applications",
+                to="jobs.job",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='application',
-            constraint=models.UniqueConstraint(fields=('job', 'candidate'), name='unique_job_candidate_application'),
+            model_name="application",
+            constraint=models.UniqueConstraint(
+                fields=("job", "candidate"), name="unique_job_candidate_application"
+            ),
         ),
     ]

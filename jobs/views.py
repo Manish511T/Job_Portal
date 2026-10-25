@@ -1,4 +1,4 @@
-
+from django.db.models import Count
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,15 +19,9 @@ class SkillListView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SkillDetailView(APIView):
@@ -45,77 +39,57 @@ class SkillDetailView(APIView):
 class JobListCreateView(APIView):
 
     def get(self, request):
-        jobs = Job.objects.select_related('company').prefetch_related('skills')
-        serializer = JobSerializer(jobs, many=True)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
+        jobs = (
+            Job.objects.select_related("company")
+            .prefetch_related("skills")
+            .annotate(app_count=Count("applications"))
         )
+        serializer = JobSerializer(jobs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = JobSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class JobDetailView(APIView):
-
-    def get(self, request, pk):
-        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
-        serializer = JobSerializer(job)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
+    def get_object(self, pk):
+        return get_object_or_404(
+            Job.objects.select_related("company").prefetch_related("skills"), pk=pk
         )
 
+    def get(self, request, pk):
+        job = self.get_object(pk)
+        serializer = JobSerializer(job)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def put(self, request, pk):
-        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
+        job = self.get_object(pk)
         serializer = JobSerializer(job, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
-        job = get_object_or_404(Job.objects.select_related('company').prefetch_related('skills'), pk=pk)
-        serializer = JobSerializer(
-            job,
-            data=request.data,
-            partial=True
-        )
+        job = self.get_object(pk)
+        serializer = JobSerializer(job, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        job = get_object_or_404(Job, pk=pk)
-
+        job = self.get_object(pk)
         try:
             job.delete()
         except ProtectedError:
@@ -126,7 +100,7 @@ class JobDetailView(APIView):
                         "are linked to it. Close the job instead."
                     )
                 },
-                status=status.HTTP_409_CONFLICT
+                status=status.HTTP_409_CONFLICT,
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)

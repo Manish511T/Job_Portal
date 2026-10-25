@@ -7,31 +7,83 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('companies', '0001_initial'),
-        ('jobs', '0001_initial'),
+        ("companies", "0001_initial"),
+        ("jobs", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('location', models.CharField(max_length=150)),
-                ('job_type', models.CharField(choices=[('FULL_TIME', 'Full Time'), ('PART_TIME', 'Part Time'), ('CONTRACT', 'Contract'), ('INTERNSHIP', 'Internship')], max_length=10)),
-                ('salary_min', models.PositiveIntegerField(blank=True, null=True)),
-                ('salary_max', models.PositiveIntegerField(blank=True, null=True)),
-                ('experience_required', models.PositiveSmallIntegerField(default=0)),
-                ('deadline', models.DateField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('DRAFT', 'Draft'), ('OPEN', 'Open'), ('CLOSED', 'Closed')], default='DRAFT', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='jobs', to='companies.company')),
-                ('skills', models.ManyToManyField(blank=True, related_name='jobs', to='jobs.skill')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                ("location", models.CharField(max_length=150)),
+                (
+                    "job_type",
+                    models.CharField(
+                        choices=[
+                            ("FULL_TIME", "Full Time"),
+                            ("PART_TIME", "Part Time"),
+                            ("CONTRACT", "Contract"),
+                            ("INTERNSHIP", "Internship"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("salary_min", models.PositiveIntegerField(blank=True, null=True)),
+                ("salary_max", models.PositiveIntegerField(blank=True, null=True)),
+                ("experience_required", models.PositiveSmallIntegerField(default=0)),
+                ("deadline", models.DateField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("DRAFT", "Draft"),
+                            ("OPEN", "Open"),
+                            ("CLOSED", "Closed"),
+                        ],
+                        default="DRAFT",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="jobs",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "skills",
+                    models.ManyToManyField(
+                        blank=True, related_name="jobs", to="jobs.skill"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'constraints': [models.CheckConstraint(condition=models.Q(('salary_min__isnull', True), ('salary_max__isnull', True), ('salary_min__lte', models.F('salary_max')), _connector='OR'), name='job_salary_min_lte_max')],
+                "ordering": ["-created_at"],
+                "constraints": [
+                    models.CheckConstraint(
+                        condition=models.Q(
+                            ("salary_min__isnull", True),
+                            ("salary_max__isnull", True),
+                            ("salary_min__lte", models.F("salary_max")),
+                            _connector="OR",
+                        ),
+                        name="job_salary_min_lte_max",
+                    )
+                ],
             },
         ),
     ]

@@ -5,19 +5,19 @@ from .models import Application
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'job',
-        'candidate',
-        'status',
-        'applied_at',
+        "id",
+        "job",
+        "candidate",
+        "status",
+        "applied_at",
     )
 
-    list_filter = ('status',)
+    list_filter = ("status",)
 
     search_fields = (
-        'job__title',
-        'candidate__username',
-        'candidate__email',
+        "job__title",
+        "candidate__username",
+        "candidate__email",
     )
 
-    list_select_related = ('job', 'candidate')
+    list_select_related = ("job", "candidate")
