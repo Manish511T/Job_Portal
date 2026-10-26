@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -52,9 +51,7 @@ class RegisterTests(APITestCase):
         return response.data
 
     def authenticate(self, access_token):
-        self.client.credentials(
-            HTTP_AUTHORIZATION=f"Bearer {access_token}"
-        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
     # 1. Registration succeeds and does not expose passwords.
     def test_register_candidate(self):
@@ -70,11 +67,7 @@ class RegisterTests(APITestCase):
         )
         self.assertNotIn("password", response.data)
         self.assertNotIn("password2", response.data)
-        self.assertTrue(
-            User.objects.filter(
-                email="candidate@example.com"
-            ).exists()
-        )
+        self.assertTrue(User.objects.filter(email="candidate@example.com").exists())
 
     # 2. Public registration cannot create an admin.
     def test_register_admin_fails(self):
@@ -108,9 +101,7 @@ class RegisterTests(APITestCase):
     def test_mismatched_passwords_fail(self):
         response = self.client.post(
             self.register_url,
-            self.register_data(
-                password2="Different-Secure-Password-928!"
-            ),
+            self.register_data(password2="Different-Secure-Password-928!"),
             format="json",
         )
 

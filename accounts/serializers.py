@@ -1,38 +1,63 @@
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import password_validation
 from rest_framework import serializers
 from .models import User
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
+def validate_unique_email(value, instance=None):
+    value = value.strip().lower()
 
+    users = User.objects.filter(email__iexact=value)
+
+    if instance is not None:
+        users = users.exclude(pk=instance.pk)
+
+    if users.exists():
+        raise serializers.ValidationError("A user with this email already exists.")
+
+    return value
+
+
+class EmailValidationMixin:
+    def validate_email(self, value):
+        return validate_unique_email(
+            value,
+            instance=getattr(self, "instance", None),
+        )
+
+
+class RegisterSerializer(EmailValidationMixin, serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
+    password2 = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
+
+    role = serializers.ChoiceField(
+        choices=[
+            (User.Role.CANDIDATE, "Candidate"),
+            (User.Role.EMPLOYER, "Employer"),
+        ],
+        default=User.Role.CANDIDATE,
+    )
     class Meta:
         model = User
-        fields = ["username", "email", "password", "password2", "role"]
+        fields = ["id", "username", "email", "password", "password2", "role"]
+        read_only_fields = ["id"]
 
-    def validate_role(self, value):
-        if value.upper() == "ADMIN":
-            raise serializers.ValidationError("You cannot register as an admin.")
-        return value
-
-    def validate_email(self, value):
-        value = value.strip().lower()
-
-        existing_users = User.objects.filter(email__iexact=value)
-
-        if self.instance:
-            existing_users = existing_users.exclude(pk=self.instance.pk)
-
-        if existing_users.exists():
-            raise serializers.ValidationError("A user with this email already exists.")
-
-        return value
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "Passwords do not match."})
 
+        candidate = User(username=attrs.get("username"), email=attrs.get("email"))
+        try:
+            password_validation.validate_password(attrs["password"], user=candidate)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)})
         return attrs
 
     def create(self, validated_data):
@@ -45,7 +70,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(EmailValidationMixin, serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [

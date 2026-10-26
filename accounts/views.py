@@ -1,4 +1,3 @@
-from django.contrib.auth import update_session_auth_hash
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -32,18 +31,15 @@ class MeView(APIView):
     def patch(self, request):
         serializer = UserSerializer(
             request.user,
-            data = request.data,
-            partial = True,
+            data=request.data,
+            partial=True,
         )
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(APIView):
@@ -51,8 +47,7 @@ class ChangePasswordView(APIView):
 
     def post(self, request):
         serializer = ChangePasswordSerializer(
-            data = request.data,
-            context = {"request":request}
+            data=request.data, context={"request": request}
         )
 
         if not serializer.is_valid():
@@ -63,15 +58,13 @@ class ChangePasswordView(APIView):
 
         user = request.user
         user.set_password(serializer.validated_data["new_password"])
-        user.save()
+        user.save(update_fields=["password"])
 
-        update_session_auth_hash(request, user)
 
         return Response(
-            {"detail":"Password changed successfully."},
+            {"detail": "Password changed successfully."},
             status=status.HTTP_200_OK,
         )
-
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -88,14 +81,25 @@ class LogoutView(APIView):
         token = serializer.validated_data["refresh"]
 
         try:
-            RefreshToken(token).blacklist()
+            refresh_token = RefreshToken(token)
+            token_user_id = refresh_token.get("user_id")
+
+            if str(token_user_id) != str(request.user.pk):
+                return Response(
+                    {
+                        "detail": (
+                            "You cannot revoke another user's token."
+                        )
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            refresh_token.blacklist()
+
         except TokenError:
             return Response(
-                {"detail":"Invalid or expired refresh token."},
+                {"detail": "Invalid or expired refresh token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         return Response(status=status.HTTP_205_RESET_CONTENT)
-
-
-
