@@ -43,11 +43,11 @@ class RegisterSerializer(EmailValidationMixin, serializers.ModelSerializer):
         ],
         default=User.Role.CANDIDATE,
     )
+
     class Meta:
         model = User
         fields = ["id", "username", "email", "password", "password2", "role"]
         read_only_fields = ["id"]
-
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:

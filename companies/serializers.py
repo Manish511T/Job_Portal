@@ -2,7 +2,16 @@ from rest_framework import serializers
 from .models import Company
 
 
-class CompanyMiniSerializer(serializers.ModelSerializer):
+class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ["id", "name", "location"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "website",
+            "location",
+            "logo",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]

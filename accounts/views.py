@@ -60,7 +60,6 @@ class ChangePasswordView(APIView):
         user.set_password(serializer.validated_data["new_password"])
         user.save(update_fields=["password"])
 
-
         return Response(
             {"detail": "Password changed successfully."},
             status=status.HTTP_200_OK,
@@ -86,11 +85,7 @@ class LogoutView(APIView):
 
             if str(token_user_id) != str(request.user.pk):
                 return Response(
-                    {
-                        "detail": (
-                            "You cannot revoke another user's token."
-                        )
-                    },
+                    {"detail": ("You cannot revoke another user's token.")},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
